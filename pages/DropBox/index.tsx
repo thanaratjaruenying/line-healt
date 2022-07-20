@@ -3,7 +3,7 @@ import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import dayjs from "dayjs";
 
-import ProgressBar from '../../components/progresBar'
+import ProgressBar from "../../components/progresBar";
 import config from "../../config";
 
 const csv = <Image src="/csv.png" alt="me" width="64" height="64" />;
@@ -20,7 +20,8 @@ interface HealthOverAll {
 
 export default function DropBox() {
   const [startTime, setStartTime] = useState<dayjs.Dayjs>();
-  const [endTime, setEndTime] = useState<dayjs.Dayjs>();
+  const [endTime, setEndTime] = useState<dayjs.Dayjs>()
+  const [percent, setPercent] = useState<number>(0)
   const [file, setFile] = useState<File | undefined>();
   const [healthResult, setHealthResult] = useState<
     ReadonlyArray<HealthUrlResult>
@@ -35,16 +36,25 @@ export default function DropBox() {
     const formData = new FormData();
     formData.append("file", acceptedFiles[0], acceptedFiles[0].name);
 
-    const response = await fetch(`${config.serverUrl}/upload`, {
-      method: "POST",
-      body: formData,
-      redirect: "follow",
+    let request = new XMLHttpRequest();
+    request.open("POST", `${config.serverUrl}/upload`);
+
+    // upload progress event
+    request.upload.addEventListener("progress", function (e) {
+      // upload progress as percentage
+      let percentCompleted = (e.loaded / e.total) * 100;
+      setPercent(percentCompleted);
     });
-    const result = await response.json();
 
-    setEndTime(dayjs());
+    // request finished event
+    request.addEventListener("load", function (e) {
+      setEndTime(dayjs());
 
-    setHealthResult(result);
+      setHealthResult(JSON.parse(request.response));
+    });
+
+    // send POST request to server
+    request.send(formData);
   }, []);
 
   const executeTime = () => {
@@ -107,7 +117,7 @@ export default function DropBox() {
         <div>
           {csv}
           <p>{file.name}</p>
-          <ProgressBar progressPercentage={70} />
+          <ProgressBar progressPercentage={percent} />
         </div>
       ) : undefined}
       {healthResult.length ? (
