@@ -20,8 +20,8 @@ interface HealthOverAll {
 
 export default function DropBox() {
   const [startTime, setStartTime] = useState<dayjs.Dayjs>();
-  const [endTime, setEndTime] = useState<dayjs.Dayjs>()
-  const [percent, setPercent] = useState<number>(0)
+  const [endTime, setEndTime] = useState<dayjs.Dayjs>();
+  const [percent, setPercent] = useState<number>(0);
   const [file, setFile] = useState<File | undefined>();
   const [healthResult, setHealthResult] = useState<
     ReadonlyArray<HealthUrlResult>
@@ -101,41 +101,51 @@ export default function DropBox() {
   });
 
   return (
-    <div {...getRootProps()}>
-      {csv}
-      <input {...getInputProps()} />
-      {isDragActive ? (
-        <p>Drop the file here ...</p>
-      ) : (
-        <p>Drag your .csv file here to start uploading</p>
-      )}
-      <p>OR</p>
-      <button type="button" onClick={open}>
-        Browse File
-      </button>
+    <>
+      <div
+        {...getRootProps()}
+        className="flex flex-col items-center p-10 bg-slate-50 border-dashed border-2 border-slate-300 rounded-md"
+      >
+        {csv}
+        <input {...getInputProps()} />
+        {isDragActive ? (
+          <p>Drop the file here ...</p>
+        ) : (
+          <p>Drag your .csv file here to start uploading</p>
+        )}
+        <p>OR</p>
+        <button className="bg-sky-500 p-2 rounded-md text-white" type="button" onClick={open}>
+          Browse File
+        </button>
+      </div>
       {file ? (
-        <div>
-          {csv}
-          <p>{file.name}</p>
-          <ProgressBar progressPercentage={percent} />
+        <div className="flex flex-row p-5 w-full">
+          <div>{csv}</div>
+          <div className="w-full flex flex-col justify-evenly">
+            <div className="flex flex-row justify-between w-full">
+              <p>{file.name}</p>
+              <p>{percent}%</p>
+            </div>
+            <ProgressBar progressPercentage={percent} />
+          </div>
         </div>
       ) : undefined}
       {healthResult.length ? (
-        <div>
+        <div className="p-10 bg-white border-2 rounded-md mt-10 shadow-md">
           <p>Total {healthResult.length} Websites</p>
           <p>({executeTime()})</p>
-          <div>
-            <div>
-              <span>UP</span>
-              <p>{healthOverall.up}</p>
+          <div className="flex flex-row justify-around rounded-md mt-5">
+            <div className="bg-green-500 p-4 rounded-md text-white	">
+              <span className="text-xs">UP</span>
+              <p className="text-xl">{healthOverall.up}</p>
             </div>
-            <div>
-              <span>DOWN</span>
-              <p>{healthOverall.down}</p>
+            <div className="bg-slate-50 p-4 rounded-md">
+              <span className="text-xs">DOWN</span>
+              <p className="text-xl">{healthOverall.down}</p>
             </div>
           </div>
         </div>
       ) : undefined}
-    </div>
+    </>
   );
 }
