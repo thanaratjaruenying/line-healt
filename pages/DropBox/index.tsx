@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
+import dayjs from "dayjs";
 
 import config from "../../config";
 
@@ -17,6 +18,8 @@ interface HealthOverAll {
 }
 
 export default function DropBox() {
+  const [startTime, setStartTime] = useState<dayjs.Dayjs>()
+  const [endTime, setEndTime] = useState<dayjs.Dayjs>()
   const [file, setFile] = useState<File | undefined>();
   const [healthResult, setHealthResult] = useState<
     ReadonlyArray<HealthUrlResult>
@@ -26,6 +29,7 @@ export default function DropBox() {
     down: 0,
   });
   const onDrop = useCallback(async (acceptedFiles: any) => {
+    setStartTime(dayjs())
     setFile(acceptedFiles[0]);
     const formData = new FormData();
     formData.append("file", acceptedFiles[0], acceptedFiles[0].name);
@@ -36,8 +40,24 @@ export default function DropBox() {
       redirect: "follow",
     });
     const result = await response.json();
+
+    setEndTime(dayjs())
+
     setHealthResult(result);
   }, []);
+
+  const executeTime = () => {
+    const second = endTime?.diff(startTime, "second") || 0
+    if (second <= 0) {
+      return 'Used less than 1 second'
+    }
+    const min = endTime?.diff(startTime, "minute") || 0
+    if (min > 0) {
+      return `Used ${min} minutes and ${second} seconds`
+    } else {
+      return `Used ${second} seconds`
+    }
+  }
 
   useEffect(() => {
     const cal = healthResult.reduce(
@@ -91,7 +111,7 @@ export default function DropBox() {
       {healthResult.length ? (
         <div>
           <p>Total {healthResult.length} Websites</p>
-          <p>(Used)</p>
+          <p>({executeTime()})</p>
           <div>
             <div>
               <span>UP</span>
