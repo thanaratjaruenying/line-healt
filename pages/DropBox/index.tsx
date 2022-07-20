@@ -3,6 +3,7 @@ import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import dayjs from "dayjs";
 
+import ProgressBar from '../../components/progresBar'
 import config from "../../config";
 
 const csv = <Image src="/csv.png" alt="me" width="64" height="64" />;
@@ -18,8 +19,8 @@ interface HealthOverAll {
 }
 
 export default function DropBox() {
-  const [startTime, setStartTime] = useState<dayjs.Dayjs>()
-  const [endTime, setEndTime] = useState<dayjs.Dayjs>()
+  const [startTime, setStartTime] = useState<dayjs.Dayjs>();
+  const [endTime, setEndTime] = useState<dayjs.Dayjs>();
   const [file, setFile] = useState<File | undefined>();
   const [healthResult, setHealthResult] = useState<
     ReadonlyArray<HealthUrlResult>
@@ -29,7 +30,7 @@ export default function DropBox() {
     down: 0,
   });
   const onDrop = useCallback(async (acceptedFiles: any) => {
-    setStartTime(dayjs())
+    setStartTime(dayjs());
     setFile(acceptedFiles[0]);
     const formData = new FormData();
     formData.append("file", acceptedFiles[0], acceptedFiles[0].name);
@@ -41,23 +42,23 @@ export default function DropBox() {
     });
     const result = await response.json();
 
-    setEndTime(dayjs())
+    setEndTime(dayjs());
 
     setHealthResult(result);
   }, []);
 
   const executeTime = () => {
-    const second = endTime?.diff(startTime, "second") || 0
+    const second = endTime?.diff(startTime, "second") || 0;
     if (second <= 0) {
-      return 'Used less than 1 second'
+      return "Used less than 1 second";
     }
-    const min = endTime?.diff(startTime, "minute") || 0
+    const min = endTime?.diff(startTime, "minute") || 0;
     if (min > 0) {
-      return `Used ${min} minutes and ${second} seconds`
+      return `Used ${min} minutes and ${second} seconds`;
     } else {
-      return `Used ${second} seconds`
+      return `Used ${second} seconds`;
     }
-  }
+  };
 
   useEffect(() => {
     const cal = healthResult.reduce(
@@ -106,6 +107,7 @@ export default function DropBox() {
         <div>
           {csv}
           <p>{file.name}</p>
+          <ProgressBar progressPercentage={70} />
         </div>
       ) : undefined}
       {healthResult.length ? (
