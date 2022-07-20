@@ -51,6 +51,7 @@ export default function DropBox() {
       setHealthResult(response.data);
     } catch (error) {
       alert("Somthing went wrong, please try again later");
+      setFile(undefined);
     }
   }, []);
 
@@ -118,7 +119,7 @@ export default function DropBox() {
         )}
         <p>OR</p>
         <button
-          className="bg-sky-500 p-2 rounded-md text-white"
+          className="bg-sky-500 p-2 rounded-md text-white mt-2"
           type="button"
           onClick={open}
         >
