@@ -3,8 +3,9 @@ import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import dayjs from "dayjs";
 
+import axios from "../../lib/axios";
 import ProgressBar from "../../components/progresBar";
-import config from "../../config";
+
 
 const csv = <Image src="/csv.png" alt="me" width="64" height="64" />;
 
@@ -36,25 +37,21 @@ export default function DropBox() {
     const formData = new FormData();
     formData.append("file", acceptedFiles[0], acceptedFiles[0].name);
 
-    let request = new XMLHttpRequest();
-    request.open("POST", `${config.serverUrl}/upload`);
+    try {
+      const response = await axios.post("upload", formData, {
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          setPercent(percentCompleted);
+        },
+      });
 
-    // upload progress event
-    request.upload.addEventListener("progress", function (e) {
-      // upload progress as percentage
-      let percentCompleted = (e.loaded / e.total) * 100;
-      setPercent(percentCompleted);
-    });
-
-    // request finished event
-    request.addEventListener("load", function (e) {
       setEndTime(dayjs());
-
-      setHealthResult(JSON.parse(request.response));
-    });
-
-    // send POST request to server
-    request.send(formData);
+      setHealthResult(response.data);
+    } catch (error) {
+      alert("Somthing went wrong, please try again later");
+    }
   }, []);
 
   const executeTime = () => {
@@ -92,6 +89,12 @@ export default function DropBox() {
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
+    onDragEnter: () => {
+      setHealthResult([]);
+    },
+    onFileDialogOpen: () => {
+      setHealthResult([]);
+    },
     noClick: true,
     maxSize: 1024 * 1024 * 10,
     maxFiles: 1,
@@ -114,7 +117,11 @@ export default function DropBox() {
           <p>Drag your .csv file here to start uploading</p>
         )}
         <p>OR</p>
-        <button className="bg-sky-500 p-2 rounded-md text-white" type="button" onClick={open}>
+        <button
+          className="bg-sky-500 p-2 rounded-md text-white"
+          type="button"
+          onClick={open}
+        >
           Browse File
         </button>
       </div>
