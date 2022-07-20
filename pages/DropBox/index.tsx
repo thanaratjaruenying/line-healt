@@ -111,7 +111,7 @@ export default function DropBox() {
         className="flex flex-col items-center p-10 bg-slate-50 border-dashed border-2 border-slate-300 rounded-md"
       >
         {csv}
-        <input {...getInputProps()} />
+        <input {...getInputProps()} data-testid="drop-input" />
         {isDragActive ? (
           <p>Drop the file here ...</p>
         ) : (
